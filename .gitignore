@@ -1,0 +1,26 @@
+# Node.js / Next.js
+my-app/node_modules/
+my-app/.next/
+my-app/out/
+my-app/build/
+
+# Python Virtual Environments & Cache
+agent/.venv/
+agent/__pycache__/
+agent/*.pyc
+agent/.pytest_cache/
+.pytest_cache/
+
+# Environment & Secrets (Never commit credentials)
+agent/.env
+agent/.env.local
+my-app/.env
+my-app/.env.local
+
+# OS & IDEs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.sln
