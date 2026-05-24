@@ -1,5 +1,3 @@
-import type { Dispatch, SetStateAction } from "react";
-
 import type {
   FailedClickUpTask,
   Priority,
@@ -12,32 +10,38 @@ export function ApprovalQueueScreen({
   allTicketsReviewed,
   failedTaskByTicketId,
   failedTasks,
+  isPublishing,
+  onCloseTicket,
   onPublish,
   onSelectTicket,
+  onToggleReview,
   onUpdateTicket,
+  publishError,
   publishingApproved,
   publishedTaskByTicketId,
   publishedTasks,
+  reviewedCount,
   reviewedTicketIds,
   selectedTicket,
-  setPublishingApproved,
-  setReviewedTicketIds,
   ticketCount,
   tickets,
 }: {
   allTicketsReviewed: boolean;
   failedTaskByTicketId: Map<string, FailedClickUpTask>;
   failedTasks: FailedClickUpTask[];
+  isPublishing: boolean;
+  onCloseTicket: () => void;
   onPublish: () => void;
   onSelectTicket: (ticketId: string) => void;
+  onToggleReview: (ticketId: string) => void;
   onUpdateTicket: (ticketId: string, updates: Partial<Ticket>) => void;
+  publishError: string;
   publishingApproved: boolean;
   publishedTaskByTicketId: Map<string, PublishedClickUpTask>;
   publishedTasks: PublishedClickUpTask[];
+  reviewedCount: number;
   reviewedTicketIds: string[];
   selectedTicket: Ticket | undefined;
-  setPublishingApproved: Dispatch<SetStateAction<boolean>>;
-  setReviewedTicketIds: Dispatch<SetStateAction<string[]>>;
   ticketCount: number;
   tickets: Ticket[];
 }) {
@@ -72,17 +76,18 @@ export function ApprovalQueueScreen({
         <PublishPanel
           allTicketsReviewed={allTicketsReviewed}
           failedTasks={failedTasks}
+          isPublishing={isPublishing}
           onPublish={onPublish}
           publishedTasks={publishedTasks}
           publishingApproved={publishingApproved}
-          setPublishingApproved={setPublishingApproved}
+          publishError={publishError}
         />
       </div>
 
       <div className="grid gap-0 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="border-b border-slate-200 xl:border-b-0 xl:border-r xl:border-slate-200">
           <QueueHeader
-            reviewedCount={reviewedTicketIds.length}
+            reviewedCount={reviewedCount}
             ticketCount={ticketCount}
           />
           <div className="max-h-[760px] overflow-auto p-4">
@@ -114,9 +119,10 @@ export function ApprovalQueueScreen({
         </div>
 
         <TicketDetailPanel
+          onCloseTicket={onCloseTicket}
           onUpdateTicket={onUpdateTicket}
+          onToggleReview={onToggleReview}
           selectedTicket={selectedTicket}
-          setReviewedTicketIds={setReviewedTicketIds}
         />
       </div>
     </section>
@@ -201,13 +207,15 @@ function TicketQueueRow({
 }
 
 function TicketDetailPanel({
+  onCloseTicket,
   onUpdateTicket,
+  onToggleReview,
   selectedTicket,
-  setReviewedTicketIds,
 }: {
+  onCloseTicket: () => void;
   onUpdateTicket: (ticketId: string, updates: Partial<Ticket>) => void;
+  onToggleReview: (ticketId: string) => void;
   selectedTicket: Ticket | undefined;
-  setReviewedTicketIds: Dispatch<SetStateAction<string[]>>;
 }) {
   if (!selectedTicket) {
     return (
@@ -227,7 +235,7 @@ function TicketDetailPanel({
 
   return (
     <div className="flex min-h-[760px] flex-col">
-      <div className="border-b border-slate-200 px-6 py-5">
+        <div className="border-b border-slate-200 px-6 py-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
@@ -239,6 +247,13 @@ function TicketDetailPanel({
           </div>
           <PriorityBadge priority={selectedTicket.priority} />
         </div>
+        <button
+          className="mt-3 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400"
+          onClick={onCloseTicket}
+          type="button"
+        >
+          Close
+        </button>
         <p className="mt-3 text-sm text-slate-600">
           Update the ticket fields directly, then mark the ticket as reviewed
           once it is ready for PM sync.
@@ -362,13 +377,7 @@ function TicketDetailPanel({
 
         <button
           className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-          onClick={() =>
-            setReviewedTicketIds((currentReviewed) =>
-              currentReviewed.includes(selectedTicket.id)
-                ? currentReviewed
-                : [...currentReviewed, selectedTicket.id],
-            )
-          }
+          onClick={() => onToggleReview(selectedTicket.id)}
           type="button"
         >
           Mark as reviewed
@@ -381,17 +390,19 @@ function TicketDetailPanel({
 function PublishPanel({
   allTicketsReviewed,
   failedTasks,
+  isPublishing,
   onPublish,
   publishedTasks,
   publishingApproved,
-  setPublishingApproved,
+  publishError,
 }: {
   allTicketsReviewed: boolean;
   failedTasks: FailedClickUpTask[];
+  isPublishing: boolean;
   onPublish: () => void;
   publishedTasks: PublishedClickUpTask[];
   publishingApproved: boolean;
-  setPublishingApproved: Dispatch<SetStateAction<boolean>>;
+  publishError: string;
 }) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
@@ -419,14 +430,15 @@ function PublishPanel({
       <div className="mt-4 space-y-3">
         <button
           className="w-full rounded-full bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          disabled={!allTicketsReviewed || publishingApproved}
-          onClick={() => {
-            setPublishingApproved(true);
-            onPublish();
-          }}
+          disabled={!allTicketsReviewed || publishingApproved || isPublishing}
+          onClick={onPublish}
           type="button"
         >
-          {publishingApproved ? "Synced" : "Sync selected tickets"}
+          {isPublishing
+            ? "Syncing to PM tool..."
+            : publishingApproved
+              ? "Synced"
+              : "Sync selected tickets"}
         </button>
         <div className="grid grid-cols-2 gap-3">
           <MetricCard label="Synced" value={String(publishedTasks.length)} />
@@ -439,6 +451,12 @@ function PublishPanel({
           <PublishChecklistStatus key={task.local_ticket_id} task={task} />
         ))}
       </div>
+
+      {publishError ? (
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {publishError}
+        </div>
+      ) : null}
     </div>
   );
 }

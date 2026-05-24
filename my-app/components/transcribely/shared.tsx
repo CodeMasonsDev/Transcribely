@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type {
   Priority,
   ProjectManagementProvider,
@@ -153,10 +155,18 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
 }
 
 export function StatusBadge({
+  children,
+  failed = false,
   label,
+  published = false,
+  reviewed = false,
   tone = "slate",
 }: {
-  label: string;
+  children?: ReactNode;
+  failed?: boolean;
+  label?: string;
+  published?: boolean;
+  reviewed?: boolean;
   tone?: "slate" | "green" | "amber" | "red" | "blue";
 }) {
   const toneClasses: Record<typeof tone, string> = {
@@ -167,9 +177,13 @@ export function StatusBadge({
     blue: "bg-blue-100 text-blue-700",
   };
 
+  const fallbackTone = published ? "green" : failed ? "red" : reviewed ? "blue" : tone;
+
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${toneClasses[tone]}`}>
-      {label}
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${toneClasses[fallbackTone]}`}
+    >
+      {children ?? label}
     </span>
   );
 }

@@ -13,6 +13,11 @@ import {
   TranscriptAnalyzerScreen,
 } from "./transcribely-workflow";
 import {
+  PUBLISH_URL,
+  STREAM_API_URL,
+  TEST_CONNECTION_URL,
+} from "../lib/transcribely-constants";
+import {
   orchestrationResponseSchema,
   projectManagementConnectionResponseSchema,
   publishTicketsResponseSchema,
@@ -24,12 +29,6 @@ import {
   type PublishedClickUpTask,
   type Ticket,
 } from "../lib/transcribely-schemas";
-
-const STREAM_API_URL = "http://127.0.0.1:8000/api/v1/orchestrate/stream";
-const PUBLISH_URL =
-  "http://127.0.0.1:8000/api/v1/project-management/publish";
-const TEST_CONNECTION_URL =
-  "http://127.0.0.1:8000/api/v1/project-management/test-connection";
 
 const workflowSteps = [
   "Transcript cleaner",
@@ -564,6 +563,7 @@ export default function Home() {
                 reviewedCount={reviewedCount}
                 reviewedTicketIds={reviewedTicketIds}
                 selectedTicket={selectedTicket}
+                ticketCount={tickets.length}
                 tickets={tickets}
               />
             ) : null}
