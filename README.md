@@ -180,3 +180,9 @@ Transcribely provides a unified Integrations Hub allowing you to connect and pub
 | `CLICKUP_LIST_ID` | Specific ClickUp list ID where tickets should land. | `901802347209` |
 | `CLICKUP_DEFAULT_STATUS` | Default status given to synced tasks. | `to do` |
 | `CLICKUP_DEFAULT_TAGS` | Comma-separated list of tags to tag tasks. | `ai-generated` |
+
+---
+
+## Agent Workflow
+
+This repository includes a repo-scoped Codex multi-agent workflow for controlled Transcribely development. See `AGENTS.md` for agent roles and guardrails, and `docs/agents/` for architecture, workflow, and quality gate details.
